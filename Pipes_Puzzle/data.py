@@ -13,10 +13,10 @@ Note:
         value = 4 ==> T-joint pipes
 
     key ["heading"]:
-        value = 0 == Eastern ">" 
-        value = 90 == Southern "v"
-        value = 180 == Western "<"
-        value = 270 == Northern "^"
+        value = 0 ==> Eastern ">" 
+        value = 90 ==> Southern "v"
+        value = 180 ==> Western "<"
+        value = 270 ==> Northern "^"
 """
 
 HEADING = [0, 90, 180, 270]

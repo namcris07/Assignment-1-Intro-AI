@@ -1,6 +1,6 @@
 import tkinter as tk
 import matplotlib.pyplot as plt
-from ui.components import ModernButton
+from ui import ModernButton
 
 class DiagnosticsPanel(tk.LabelFrame):
     def __init__(self, master, **kwargs):

@@ -1,15 +1,9 @@
 import tkinter as tk
 import copy
-
-from solver import DFSSolver, BFSSolver, AStarSolver, SimulatedAnnealingSolver
-from solver.state_and_node import State 
+from solver import DFSSolver, BFSSolver, AStarSolver, SimulatedAnnealingSolver, State
 from performance.memory import PerformanceTracker
 from data import TESTCASE
-
-from ui.components import ModernButton
-from ui.board_view import BoardView
-from ui.diagnostics_panel import DiagnosticsPanel
-from ui.control_panel import ControlPanel
+from ui import ModernButton, BoardView, DiagnosticsPanel, ControlPanel
 
 class PipesGUI:
     def __init__(self, root: tk.Tk):
