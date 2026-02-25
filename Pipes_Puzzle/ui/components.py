@@ -1,3 +1,6 @@
+"""
+ModernButton: Nút với style màu sắc (primary, warning, secondary, nav) và hiệu ứng hover.
+"""
 import tkinter as tk
 
 BUTTON_STYLES = {

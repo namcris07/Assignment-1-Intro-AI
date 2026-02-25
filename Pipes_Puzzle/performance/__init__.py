@@ -1,3 +1,4 @@
+"""Module performance: Timer, MemoryTracker, PerformanceTracker cho đo thời gian và bộ nhớ."""
 from .timer import (
     Timer,
     SolverTimer,

@@ -1,3 +1,7 @@
+"""
+Điểm vào ứng dụng Pipes Puzzle - AI Solver.
+Khởi tạo cửa sổ GUI và chạy vòng lặp sự kiện.
+"""
 import tkinter as tk
 from ui import PipesGUI
 

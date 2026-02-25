@@ -1,5 +1,11 @@
+"""
+DFS (Depth-First Search): Tìm kiếm theo chiều sâu.
+Dùng ngăn xếp (stack): lấy nút cuối, sinh successors thêm vào cuối.
+Không đảm bảo lời giải ngắn nhất.
+"""
 from .base_solver import BasePipesSolver
 from .state_and_node import Node, generate_successors
+
 
 class DFSSolver(BasePipesSolver):
     def _run_algorithm(self) -> bool:

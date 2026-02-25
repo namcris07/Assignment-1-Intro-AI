@@ -1,6 +1,12 @@
+"""
+BFS (Breadth-First Search): Tìm kiếm theo chiều rộng.
+Dùng hàng đợi (deque): lấy nút đầu, sinh successors thêm vào cuối.
+Đảm bảo tìm được lời giải ngắn nhất (ít bước xoay nhất).
+"""
 from collections import deque
 from .base_solver import BasePipesSolver
 from .state_and_node import Node, generate_successors
+
 
 class BFSSolver(BasePipesSolver):
     def _run_algorithm(self) -> bool:

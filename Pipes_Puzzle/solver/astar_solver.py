@@ -1,6 +1,13 @@
+"""
+A*: Tìm kiếm heuristic với f(n)=g(n)+h(n).
+- g(n): chi phí đã đi (số bước x 2)
+- h(n): heuristic ưu tiên nhiều ô có nước, phạt vòng kín, ưu tiên biên.
+Dùng heap ưu tiên: ưu tiên f(n) nhỏ nhất.
+"""
 import heapq
 from .base_solver import BasePipesSolver
 from .state_and_node import Node, generate_successors
+
 
 class AStarSolver(BasePipesSolver):
     def _run_algorithm(self) -> bool:
@@ -40,12 +47,15 @@ class AStarSolver(BasePipesSolver):
         return False
 
     def fx(self, current: Node) -> int:
+        """f(n) = g(n) + h(n): tổng chi phí ước lượng."""
         return self.gx(current) + self.hx(current)
         
     def gx(self, current: Node) -> int:
+        """g(n): chi phí thực tế đã đi (số bước x 2)."""
         return current.step * 2
         
     def hx(self, current: Node) -> int:
+        """h(n): heuristic - thưởng nhiều ô có nước, phạt vòng kín, ưu tiên ô biên hướng ra ngoài."""
         ans = -5 * current.state.countBump
         if current.previous != None:
             if current.state.countBump == current.previous.state.countBump:

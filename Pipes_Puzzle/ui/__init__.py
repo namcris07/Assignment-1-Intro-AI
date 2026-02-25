@@ -1,3 +1,4 @@
+"""Module UI: PipesGUI, BoardView, ControlPanel, DiagnosticsPanel, ModernButton."""
 from .main_window import PipesGUI
 from .components import ModernButton
 from .board_view import BoardView

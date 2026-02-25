@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pipes Puzzle — Aurora Circuit (Static)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg0:#070A12;
+      --bg1:#0B1020;
+      --card: rgba(15, 22, 38, .62);
+      --card2: rgba(15, 22, 38, .45);
+      --stroke: rgba(150, 180, 255, .14);
+      --stroke2: rgba(120, 170, 255, .10);
+      --text:#EAF0FF;
+      --muted:#9AA7C0;
+
+      --indigo:#7C5CFF;
+      --indigo2:#5D7CFF;
+      --cyan:#41D7FF;
+      --cyan2:#37F3D1;
+      --red:#FF4D4D;
+
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.40);
+      --radius: 18px;
+
+      --pipeFill: #39C6F7;
+      --pipeStroke: rgba(8, 16, 24, .85);
+
+      --font: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,92,255,.12), transparent 50%),
+                  radial-gradient(1000px 700px at 90% 25%, rgba(65,215,255,.12), transparent 52%),
+                  radial-gradient(900px 700px at 45% 95%, rgba(55,243,209,.10), transparent 55%),
+                  linear-gradient(180deg, var(--bg1), var(--bg0));
+      overflow-x:hidden;
+    }
+
+    /* Aurora layers */
+    .aurora{ position:fixed; inset:0; pointer-events:none; z-index:0; }
+    .aurora__glow{
+      position:absolute; width:72vmax; height:72vmax;
+      filter: blur(40px); opacity:.55; mix-blend-mode: screen;
+      border-radius: 999px; transform: translate3d(0,0,0);
+    }
+    .aurora__glow--a{
+      left:-18vmax; top:-22vmax;
+      background: radial-gradient(circle at 30% 30%, rgba(124,92,255,.55), transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(93,124,255,.35), transparent 62%);
+      animation: floatA 14s ease-in-out infinite;
+    }
+    .aurora__glow--b{
+      right:-20vmax; top:-10vmax;
+      background: radial-gradient(circle at 35% 35%, rgba(65,215,255,.45), transparent 62%),
+                  radial-gradient(circle at 70% 60%, rgba(55,243,209,.22), transparent 64%);
+      animation: floatB 16s ease-in-out infinite;
+    }
+    .aurora__glow--c{
+      left:10vmax; bottom:-28vmax;
+      background: radial-gradient(circle at 30% 40%, rgba(55,243,209,.26), transparent 62%),
+                  radial-gradient(circle at 70% 60%, rgba(124,92,255,.20), transparent 66%);
+      animation: floatC 18s ease-in-out infinite;
+    }
+    .aurora__noise{
+      position:absolute; inset:0; opacity:.07;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+    @keyframes floatA{ 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(8vmax, 6vmax) scale(1.06);} }
+    @keyframes floatB{ 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-8vmax, 5vmax) scale(1.03);} }
+    @keyframes floatC{ 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(4vmax, -7vmax) scale(1.07);} }
+
+    /* App container (designed for 1920x1080) */
+    .app{
+      position:relative; z-index:1;
+      width: min(1920px, 100%);
+      margin: 0 auto;
+      padding: 28px 28px 18px;
+    }
+
+    .topbar{
+      display:flex; justify-content:space-between; align-items:center;
+      gap: 18px; margin-bottom: 18px;
+    }
+    .brand{ display:flex; align-items:center; gap: 12px; }
+    .brand__mark{
+      width: 34px; height:34px; display:grid; place-items:center;
+      border-radius: 12px;
+      background: rgba(124,92,255,.10);
+      border: 1px solid rgba(124,92,255,.22);
+      box-shadow: 0 0 0 1px rgba(65,215,255,.08) inset;
+    }
+    .icon--diamond{ fill: rgba(124,92,255,.95); }
+    .brand__title{ font-weight: 800; letter-spacing: .2px; font-size: 22px; line-height: 1.05; }
+    .brand__subtitle{ font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .badge{
+      margin-left: 8px; padding: 8px 12px; border-radius: 999px;
+      font-weight: 800; font-size: 12px; letter-spacing: .6px;
+      color: rgba(255,255,255,.92);
+      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(65,215,255,.75));
+      box-shadow: 0 10px 40px rgba(124,92,255,.25);
+      user-select:none;
+    }
+
+    .chip{
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 12px; border-radius: 999px;
+      background: rgba(15,22,38,.35);
+      border: 1px solid rgba(160,190,255,.10);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow2);
+      color: rgba(234,240,255,.88);
+      font-size: 13px;
+      user-select:none;
+    }
+    .dot{
+      width:8px; height:8px; border-radius:999px;
+      box-shadow: 0 0 0 3px rgba(65,215,255,.12);
+    }
+    .dot--ok{ background: var(--cyan); }
+
+    .layout{
+      display:grid;
+      grid-template-columns: 1.35fr .75fr;
+      gap: 18px;
+      align-items:start;
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:0;
+      background: radial-gradient(600px 200px at 30% 0%, rgba(124,92,255,.12), transparent 55%),
+                  radial-gradient(560px 220px at 90% 15%, rgba(65,215,255,.10), transparent 55%);
+      opacity:.9; pointer-events:none;
+    }
+    .card__head{
+      position:relative; z-index:1;
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 16px 16px 12px;
+    }
+    .card__title{
+      margin:0;
+      font-size: 13px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(234,240,255,.88);
+      font-weight: 900;
+    }
+
+    .left{ display:grid; gap: 18px; }
+    .right{ display:grid; gap: 18px; }
+
+    /* Board */
+    .card--board{ padding-bottom: 14px; }
+    .boardWrap{ position:relative; z-index:1; padding: 0 16px 6px; }
+    .boardShell{
+      position:relative;
+      border-radius: 16px;
+      border: 1px solid rgba(160,190,255,.14);
+      background: linear-gradient(180deg, rgba(255,255,255,.93), rgba(244,248,255,.90));
+      box-shadow: 0 16px 60px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.55) inset;
+      overflow:hidden;
+      aspect-ratio: 1 / 1;
+    }
+    .boardSvg{ display:block; width:100%; height:100%; }
+
+    .boardHud{
+      position:absolute; left: 14px; top: 14px; display:flex; gap: 10px;
+      pointer-events:none;
+    }
+    .hudPill{
+      display:flex; gap: 8px; align-items:center;
+      padding: 8px 10px; border-radius: 999px;
+      background: rgba(10,16,26,.70);
+      border: 1px solid rgba(65,215,255,.18);
+      box-shadow: 0 12px 30px rgba(0,0,0,.28);
+    }
+    .hudLabel{ font-size: 11px; color: rgba(234,240,255,.75); letter-spacing: .3px; }
+    .hudValue{ font-size: 11px; font-weight: 800; color: rgba(234,240,255,.95); }
+
+    .boardCaption{
+      margin: 10px 2px 0;
+      font-size: 12px;
+      color: rgba(154,167,192,.95);
+    }
+    .captionDot{
+      display:inline-block; width:10px; height:10px; border-radius:999px;
+      transform: translateY(1px);
+    }
+    .captionDot--red{ background: var(--red); box-shadow: 0 0 0 3px rgba(255,77,77,.14); }
+
+    /* Stats */
+    .card--stats{ padding-bottom: 14px; }
+    .statsGrid{
+      position:relative; z-index:1;
+      padding: 0 16px 16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .stat{
+      position:relative;
+      padding: 14px 14px;
+      border-radius: 16px;
+      background: rgba(12,18,32,.22);
+      border: 1px solid rgba(160,190,255,.10);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.03) inset;
+      overflow:hidden;
+    }
+    .stat::after{
+      content:"";
+      position:absolute; inset:-1px;
+      background: radial-gradient(300px 120px at 0% 0%, rgba(124,92,255,.16), transparent 60%),
+                  radial-gradient(260px 120px at 100% 20%, rgba(65,215,255,.12), transparent 60%);
+      opacity:.9; pointer-events:none;
+    }
+    .stat__label{ position:relative; z-index:1; font-size: 12px; color: rgba(154,167,192,.95); }
+    .stat__value{
+      position:relative; z-index:1;
+      margin-top: 8px;
+      font-size: 20px; font-weight: 900; letter-spacing: .2px;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+    }
+    .stat__icon{
+      position:absolute; right: 12px; bottom: 12px; opacity: .55;
+    }
+    .icon--stroke{
+      stroke: rgba(234,240,255,.86);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    /* Controls */
+    .card--controls .form{ position:relative; z-index:1; padding: 0 16px 16px; }
+    .label{
+      display:block;
+      margin: 10px 0 8px;
+      font-size: 12px;
+      color: rgba(234,240,255,.86);
+      letter-spacing: .2px;
+    }
+    .select{ position:relative; }
+    select{
+      width:100%;
+      appearance:none; -webkit-appearance:none; -moz-appearance:none;
+      padding: 12px 40px 12px 12px;
+      border-radius: 14px;
+      background: rgba(10,16,26,.35);
+      border: 1px solid rgba(160,190,255,.12);
+      color: rgba(234,240,255,.92);
+      font-weight: 700;
+      outline: none;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.03) inset;
+    }
+    .select__chev{
+      position:absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: rgba(154,167,192,.95);
+      pointer-events:none;
+    }
+
+    .btnRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .btnRow--nav{ margin-top: 10px; }
+    .btn{
+      border: 0;
+      padding: 12px 12px;
+      border-radius: 14px;
+      font-weight: 900;
+      cursor:pointer;
+      user-select:none;
+    }
+    .btn--primary{
+      color: rgba(255,255,255,.95);
+      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(65,215,255,.72));
+      box-shadow: 0 18px 50px rgba(124,92,255,.22), 0 0 0 1px rgba(255,255,255,.10) inset;
+      display:flex; align-items:center; justify-content:center; gap: 10px;
+    }
+    .btn__icon{
+      width: 22px; height: 22px; display:grid; place-items:center;
+      border-radius: 999px;
+      background: rgba(10,16,26,.25);
+      border: 1px solid rgba(255,255,255,.14);
+      font-weight: 900;
+    }
+    .btn--ghost{
+      color: rgba(234,240,255,.92);
+      background: rgba(10,16,26,.30);
+      border: 1px solid rgba(160,190,255,.12);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.03) inset;
+    }
+    .btn--subtle{
+      color: rgba(234,240,255,.88);
+      background: rgba(10,16,26,.20);
+      border: 1px solid rgba(160,190,255,.10);
+    }
+    .btn[disabled]{ opacity:.45; cursor:not-allowed; }
+
+    .divider{
+      height:1px; border:0;
+      background: linear-gradient(90deg, transparent, rgba(160,190,255,.18), transparent);
+      margin: 16px 0 12px;
+    }
+    .sectionTitle{
+      font-size: 12px; font-weight: 900; letter-spacing: .2px;
+      color: rgba(234,240,255,.86);
+      margin: 6px 0 10px;
+    }
+
+    .speedRow{
+      display:flex; justify-content:space-between; align-items:center;
+      margin: 6px 0 10px;
+    }
+    .speedValue{ display:flex; gap:8px; align-items:baseline; }
+    .mono{
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+      font-weight: 950;
+    }
+    .muted{ color: rgba(154,167,192,.92); }
+
+    /* Static slider (no JS) */
+    .slider{
+      position:relative; height: 34px;
+      display:flex; align-items:center;
+    }
+    .slider__track{
+      width:100%; height: 8px;
+      border-radius: 999px;
+      background: rgba(10,16,26,.32);
+      border: 1px solid rgba(160,190,255,.12);
+      box-shadow: 0 0 0 1px rgba(255,255,255,.03) inset;
+      position:relative;
+      overflow:hidden;
+    }
+    .slider__fill{
+      position:absolute; left:0; top:0; bottom:0;
+      width: 20%;
+      background: linear-gradient(90deg, rgba(124,92,255,.95), rgba(65,215,255,.75));
+      box-shadow: 0 10px 35px rgba(124,92,255,.14);
+    }
+    .slider__thumb{
+      position:absolute;
+      left: 20%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 18px; height: 18px;
+      border-radius: 999px;
+      background: rgba(234,240,255,.92);
+      border: 1px solid rgba(10,16,26,.15);
+      box-shadow: 0 10px 25px rgba(0,0,0,.35), 0 0 0 6px rgba(65,215,255,.10);
+    }
+
+    .status{
+      margin-top: 14px;
+      display:flex; align-items:center; gap: 10px;
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: rgba(10,16,26,.22);
+      border: 1px solid rgba(160,190,255,.10);
+      color: rgba(234,240,255,.88);
+    }
+
+    .card--tips{ background: var(--card2); }
+    .tip{ position:relative; z-index:1; padding: 16px; }
+    .tip__title{ font-weight: 950; letter-spacing: .2px; margin-bottom: 6px; }
+    .tip__text{ color: rgba(154,167,192,.95); line-height: 1.55; font-size: 13px; }
+
+    /* Footer */
+    .footer{ margin-top: 16px; padding: 10px 6px 0; }
+    .footer__line{ height:1px; background: linear-gradient(90deg, transparent, rgba(160,190,255,.18), transparent); margin-bottom: 10px; }
+    .footer__content{
+      display:flex; flex-wrap:wrap; align-items:center; gap: 10px;
+      color: rgba(154,167,192,.95); font-size: 13px;
+    }
+    .footer__left{ font-weight: 900; color: rgba(234,240,255,.86); }
+    .footer__sep{ opacity:.7; }
+    .footer__nav{ display:flex; gap: 10px; flex-wrap:wrap; }
+    .footer__nav a{
+      text-decoration:none;
+      color: rgba(154,167,192,.98);
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(160,190,255,.10);
+      background: rgba(10,16,26,.16);
+    }
+    .footer__nav a.is-active{
+      border-color: rgba(124,92,255,.28);
+      color: rgba(234,240,255,.92);
+      box-shadow: 0 10px 30px rgba(124,92,255,.14);
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px){
+      .layout{ grid-template-columns: 1fr; }
+      .topbar{ flex-direction: column; align-items:flex-start; }
+    }
+
+    /* SVG pipes */
+    .pipe{ fill: none; stroke: var(--pipeFill); stroke-width: 44; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 10px 18px rgba(0,0,0,.26)); }
+    .pipeOutline{ fill: none; stroke: var(--pipeStroke); stroke-width: 52; stroke-linecap: round; stroke-linejoin: round; opacity: .90; }
+    .node{ fill: var(--pipeFill); stroke: var(--pipeStroke); stroke-width: 6; }
+    .nodeHollow{ fill: rgba(255,255,255,.92); stroke: rgba(10,16,26,.90); stroke-width: 6; }
+    .valveCore{ fill: var(--red); stroke: rgba(10,16,26,.92); stroke-width: 6; }
+    .valveRing{ fill: none; stroke: rgba(255,77,77,.55); stroke-width: 8; opacity: .9; filter: drop-shadow(0 12px 16px rgba(255,77,77,.12)); }
+    .gridLine{ stroke: rgba(120,140,170,.30); stroke-width: 2; }
+  </style>
+</head>
+
+<body>
+  <div class="aurora" aria-hidden="true">
+    <div class="aurora__glow aurora__glow--a"></div>
+    <div class="aurora__glow aurora__glow--b"></div>
+    <div class="aurora__glow aurora__glow--c"></div>
+    <div class="aurora__noise"></div>
+  </div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2l10 10-10 10L2 12 12 2z" class="icon--diamond"/>
+          </svg>
+        </span>
+        <div class="brand__text">
+          <div class="brand__title">Pipes Puzzle</div>
+          <div class="brand__subtitle">Aurora Circuit • Giao diện tĩnh</div>
+        </div>
+        <span class="badge">AI SOLVER</span>
+      </div>
+
+      <div class="topbar__right">
+        <div class="chip">
+          <span class="dot dot--ok" aria-hidden="true"></span>
+          <span>Sẵn sàng</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <!-- LEFT -->
+      <section class="left">
+        <article class="card card--board">
+          <div class="card__head">
+            <h2 class="card__title">Bàn chơi</h2>
+            <div style="display:flex; gap:10px; opacity:.8;">
+              <div class="chip" style="padding:8px 10px; font-size:12px;">
+                <span style="opacity:.8;">Level:</span><b>0</b>
+              </div>
+              <div class="chip" style="padding:8px 10px; font-size:12px;">
+                <span style="opacity:.8;">Thuật toán:</span><b>A* (Heuristic)</b>
+              </div>
+            </div>
+          </div>
+
+          <div class="boardWrap">
+            <div class="boardShell">
+              <div class="boardHud">
+                <div class="hudPill"><span class="hudLabel">Level</span><span class="hudValue">0</span></div>
+                <div class="hudPill"><span class="hudLabel">Thuật toán</span><span class="hudValue">A* (Heuristic)</span></div>
+              </div>
+
+              <!-- Static SVG board (5x5 grid + pipes + nodes + valve) -->
+              <svg class="boardSvg" viewBox="0 0 600 600" role="img" aria-label="Bàn 5×5 Pipes Puzzle">
+                <!-- grid lines -->
+                <g>
+                  <!-- coordinates: pad=70, step=115 -->
+                  <line class="gridLine" x1="70" y1="70" x2="70" y2="530"/>
+                  <line class="gridLine" x1="185" y1="70" x2="185" y2="530"/>
+                  <line class="gridLine" x1="300" y1="70" x2="300" y2="530"/>
+                  <line class="gridLine" x1="415" y1="70" x2="415" y2="530"/>
+                  <line class="gridLine" x1="530" y1="70" x2="530" y2="530"/>
+
+                  <line class="gridLine" x1="70" y1="70" x2="530" y2="70"/>
+                  <line class="gridLine" x1="70" y1="185" x2="530" y2="185"/>
+                  <line class="gridLine" x1="70" y1="300" x2="530" y2="300"/>
+                  <line class="gridLine" x1="70" y1="415" x2="530" y2="415"/>
+                  <line class="gridLine" x1="70" y1="530" x2="530" y2="530"/>
+                </g>
+
+                <!-- pipes (outline then fill) -->
+                <g>
+                  <!-- Outline -->
+                  <path class="pipeOutline" d="
+                    M 70 70 L 185 70
+                    M 185 70 L 185 300
+                    M 185 300 L 70 300
+                    M 70 300 L 70 185
+                    M 70 185 L 70 415
+                    M 70 415 L 300 415
+                    M 300 415 L 300 185
+                    M 300 185 L 530 185
+                    M 530 185 L 530 530
+                    M 530 530 L 415 530
+                    M 415 530 L 415 300
+                    M 415 300 L 300 300
+                    M 300 300 L 300 70
+                    M 300 70 L 415 70
+                    M 415 70 L 415 185
+                    M 415 185 L 415 415
+                    M 415 415 L 530 415
+                    M 185 530 L 185 300
+                    M 185 530 L 70 530
+                  "/>
+
+                  <!-- Fill -->
+                  <path class="pipe" d="
+                    M 70 70 L 185 70
+                    M 185 70 L 185 300
+                    M 185 300 L 70 300
+                    M 70 300 L 70 185
+                    M 70 185 L 70 415
+                    M 70 415 L 300 415
+                    M 300 415 L 300 185
+                    M 300 185 L 530 185
+                    M 530 185 L 530 530
+                    M 530 530 L 415 530
+                    M 415 530 L 415 300
+                    M 415 300 L 300 300
+                    M 300 300 L 300 70
+                    M 300 70 L 415 70
+                    M 415 70 L 415 185
+                    M 415 185 L 415 415
+                    M 415 415 L 530 415
+                    M 185 530 L 185 300
+                    M 185 530 L 70 530
+                  "/>
+                </g>
+
+                <!-- nodes -->
+                <g>
+                  <circle class="node" cx="70" cy="70" r="22"/>
+                  <circle class="node" cx="70" cy="300" r="22"/>
+                  <circle class="nodeHollow" cx="70" cy="415" r="22"/>
+                  <circle class="nodeHollow" cx="530" cy="70" r="22"/>
+                  <circle class="node" cx="530" cy="530" r="22"/>
+                  <circle class="node" cx="415" cy="530" r="22"/>
+                  <circle class="node" cx="300" cy="70" r="22"/>
+                  <circle class="node" cx="300" cy="415" r="22"/>
+                  <circle class="node" cx="185" cy="530" r="22"/>
+                </g>
+
+                <!-- valve at center (2,2) => (300,300) -->
+                <g>
+                  <circle class="valveRing" cx="300" cy="300" r="30"/>
+                  <circle class="valveCore" cx="300" cy="300" r="22"/>
+                </g>
+              </svg>
+            </div>
+
+            <p class="boardCaption">
+              5×5 Grid: <span class="captionDot captionDot--red" aria-hidden="true"></span> ở trung tâm (đỏ) là van nước
+            </p>
+          </div>
+        </article>
+
+        <article class="card card--stats">
+          <div class="card__head">
+            <h2 class="card__title">THỐNG KÊ</h2>
+          </div>
+
+          <div class="statsGrid">
+            <div class="stat">
+              <div class="stat__label">Bước</div>
+              <div class="stat__value">0/0</div>
+              <div class="stat__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path class="icon--stroke" d="M7 7h10v10H7V7zM10 10h4v4h-4v-4z"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="stat">
+              <div class="stat__label">Trạng thái khám phá</div>
+              <div class="stat__value">—</div>
+              <div class="stat__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path class="icon--stroke" d="M12 2l4 8-4 12-4-12 4-8z"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="stat">
+              <div class="stat__label">Thời gian</div>
+              <div class="stat__value">—</div>
+              <div class="stat__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path class="icon--stroke" d="M12 7v6l4 2"/>
+                  <path class="icon--stroke" d="M12 22a10 10 0 1 0-10-10 10 10 0 0 0 10 10z"/>
+                </svg>
+              </div>
+            </div>
+
+            <div class="stat">
+              <div class="stat__label">Bộ nhớ đỉnh</div>
+              <div class="stat__value">—</div>
+              <div class="stat__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path class="icon--stroke" d="M7 7h10v10H7V7z"/>
+                  <path class="icon--stroke" d="M9 3v4M15 3v4M9 17v4M15 17v4"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- RIGHT -->
+      <aside class="right">
+        <article class="card card--controls">
+          <div class="card__head">
+            <h2 class="card__title">ĐIỀU KHIỂN</h2>
+          </div>
+
+          <div class="form">
+            <label class="label" for="algoSelect">Thuật toán</label>
+            <div class="select">
+              <select id="algoSelect" disabled>
+                <option selected>A* (Heuristic)</option>
+                <option>DFS</option>
+                <option>BFS</option>
+                <option>Simulated Annealing</option>
+              </select>
+              <span class="select__chev" aria-hidden="true">▾</span>
+            </div>
+
+            <label class="label" for="levelSelect">Level</label>
+            <div class="select">
+              <select id="levelSelect" disabled>
+                <option selected>level 0</option>
+                <option>level 1</option>
+                <option>level 2</option>
+              </select>
+              <span class="select__chev" aria-hidden="true">▾</span>
+            </div>
+
+            <div class="btnRow">
+              <button class="btn btn--primary" type="button">
+                <span>Giải</span>
+                <span class="btn__icon" aria-hidden="true">▶</span>
+              </button>
+              <button class="btn btn--ghost" type="button">Đặt lại</button>
+            </div>
+
+            <div class="btnRow btnRow--nav">
+              <button class="btn btn--subtle" type="button" disabled>‹ Prev</button>
+              <button class="btn btn--subtle" type="button" disabled>Next ›</button>
+            </div>
+
+            <hr class="divider"/>
+
+            <div class="sectionTitle">Animation step-by-step</div>
+
+            <div class="speedRow">
+              <div class="speedLabel"><span style="font-size:12px; color: rgba(234,240,255,.86);">Tốc độ</span></div>
+              <div class="speedValue">
+                <span class="mono">50</span>
+                <span class="muted">ms</span>
+              </div>
+            </div>
+
+            <div class="slider" aria-hidden="true">
+              <div class="slider__track">
+                <div class="slider__fill"></div>
+                <div class="slider__thumb"></div>
+              </div>
+            </div>
+
+            <div class="status">
+              <span class="dot dot--ok" aria-hidden="true"></span>
+              <span>Sẵn sàng</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="card card--tips">
+          <div class="tip">
+            <div class="tip__title">Gợi ý</div>
+            <div class="tip__text">
+              Đây là giao diện tĩnh theo style Aurora Circuit (glass + neon nhẹ).
+              Khi bạn cần bản tương tác, mình có thể thêm JavaScript để chạy step-by-step, Prev/Next, và liên kết solver thật.
+            </div>
+          </div>
+        </article>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__line"></div>
+      <div class="footer__content">
+        <div class="footer__left">Pipes Puzzle</div>
+        <div class="footer__sep">—</div>
+        <nav class="footer__nav" aria-label="Thuật toán">
+          <a href="#" onclick="return false;">DFS</a>
+          <a href="#" onclick="return false;">BFS</a>
+          <a href="#" class="is-active" onclick="return false;">A*</a>
+          <a href="#" onclick="return false;">Simulated Annealing</a>
+        </nav>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

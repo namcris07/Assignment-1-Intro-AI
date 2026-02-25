@@ -1,3 +1,6 @@
+"""
+Timer: Đo thời gian chạy (ms). Dùng cho PerformanceTracker khi đo solver.
+"""
 import time
 from typing import Optional, Callable, Any
 

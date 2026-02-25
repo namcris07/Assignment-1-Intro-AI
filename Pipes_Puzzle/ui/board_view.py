@@ -1,4 +1,9 @@
+"""
+BoardView: Canvas vẽ bảng 5x5 và các ống theo type/heading.
+Ô có nước màu xanh, không nước màu trắng; ô trung tâm đánh dấu đỏ.
+"""
 import tkinter as tk
+
 
 class BoardView(tk.Frame):
     CELL_SIZE = 70
@@ -12,6 +17,7 @@ class BoardView(tk.Frame):
         self.canvas.pack()
 
     def draw_board(self, state_matrix):
+        """Vẽ lại toàn bộ bảng theo ma trận trạng thái hiện tại."""
         self.canvas.delete("all") 
         self._draw_grid_lines()
         for r in range(self.GRID_SIZE):

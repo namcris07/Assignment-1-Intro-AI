@@ -1,3 +1,6 @@
+"""
+MemoryTracker: Đo peak memory (MB) bằng tracemalloc. Dùng cho PerformanceTracker khi đo solver.
+"""
 import tracemalloc
 from typing import Callable, Any
 

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pipes Puzzle | AI Solver</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">◆</span>
+        <h1>Pipes Puzzle</h1>
+        <span class="badge">AI Solver</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <section class="board-section">
+        <div class="board-container">
+          <div class="board-frame">
+            <canvas id="board" width="350" height="350"></canvas>
+          </div>
+          <p class="board-caption">5×5 Grid · Ô trung tâm (đỏ) là van nước</p>
+        </div>
+
+        <div class="diagnostics">
+          <h3 class="diagnostics-title">Thống kê</h3>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <span class="stat-label">Bước</span>
+              <span class="stat-value" id="step-info">0 / 0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Trạng thái khám phá</span>
+              <span class="stat-value" id="nodes-info">—</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Thời gian</span>
+              <span class="stat-value" id="time-info">—</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Bộ nhớ đỉnh</span>
+              <span class="stat-value" id="memory-info">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="control-section">
+        <div class="control-card">
+          <h3 class="control-title">Điều khiển</h3>
+          
+          <div class="form-group">
+            <label for="algo">Thuật toán</label>
+            <select id="algo" class="select">
+              <option value="A*">A* (Heuristic)</option>
+              <option value="BFS">BFS (Breadth-First)</option>
+              <option value="DFS">DFS (Depth-First)</option>
+              <option value="Simulated Annealing">Simulated Annealing</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="level">Level</label>
+            <select id="level" class="select"></select>
+          </div>
+
+          <div class="btn-group">
+            <button id="btn-solve" class="btn btn-solve">
+              <span class="btn-text">Giải</span>
+              <span class="btn-icon">▶</span>
+            </button>
+            <button id="btn-reset" class="btn btn-reset">Đặt lại</button>
+          </div>
+
+          <div class="nav-group">
+            <button id="btn-prev" class="btn btn-nav" disabled title="Bước trước">
+              <span>‹</span> Prev
+            </button>
+            <button id="btn-next" class="btn btn-nav" disabled title="Bước sau">
+              Next <span>›</span>
+            </button>
+          </div>
+
+          <hr class="divider">
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="animate" checked>
+              <span class="checkbox-custom"></span>
+              Animation step-by-step
+            </label>
+          </div>
+
+          <div class="form-group range-group">
+            <div class="range-header">
+              <label for="speed">Tốc độ</label>
+              <span class="range-value" id="speed-val">50</span> <span class="unit">ms</span>
+            </div>
+            <input type="range" id="speed" class="range" min="10" max="500" value="50">
+          </div>
+        </div>
+
+        <div class="status-pill" id="status">
+          <span class="status-dot"></span>
+          <span class="status-text">Sẵn sàng</span>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <p>Pipes Puzzle · DFS · BFS · A* · Simulated Annealing</p>
+    </footer>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

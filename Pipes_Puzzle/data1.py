@@ -1,28 +1,7 @@
 """
-Note:
-    In each level 5x5 Pipes:
-        set index (x, y) start with bottom-left = (0, 0)
-        increase x when through to top
-        increase y when through to right
-        each cell is a dict with two keys: type, heading.
-
-    key ["type"]:
-        value = 1 ==> Dead-end pipes
-        value = 2 ==> Straight line pipes
-        value = 3 ==> Elbow pipes
-        value = 4 ==> T-joint pipes
-
-    key ["heading"]:
-        value = 0 ==> Eastern ">" 
-        value = 90 ==> Southern "v"
-        value = 180 ==> Western "<"
-        value = 270 ==> Northern "^"
-
-TEST: 8 Levels
-- Levels 1 -> 5: Solvable (Scrambled initial states)
-- Level 8: Unsolvable (Isolated Corner)
-- Level 9: Unsolvable (All Straight Pipes)
-- Level 10: Unsolvable (Starved Center)
+Dữ liệu thay thế cho data.py (10 level).
+Level 1-5: có lời giải. Level 6-8: không có lời giải (góc tách biệt, toàn ống thẳng, ...).
+Định dạng ô giống data.py.
 """
 
 HEADING = [0, 90, 180, 270]

@@ -1,8 +1,17 @@
+"""
+Trạng thái và nút tìm kiếm cho Pipes Puzzle.
+- State: ma trận 5x5 + logic lan truyền nước (bump), kết nối, vòng lặp.
+- Node: nút cây tìm kiếm (state, rotate, previous).
+- generate_successors(): sinh các trạng thái kế tiếp bằng cách xoay từng ô.
+"""
 import copy
 
-HEADING = [0, 90, 180, 270]
+HEADING = [0, 90, 180, 270]  # Các góc quay: Đông, Nam, Tây, Bắc
 
-class State: 
+
+class State:
+    """Trạng thái bảng 5x5: ô trung tâm (2,2) có nước, lan truyền theo kết nối ống."""
+
     def __init__(self, matrix: list) -> None:
         self.head = copy.deepcopy(matrix)
         self.setBump()
@@ -58,12 +67,14 @@ class State:
             j = 0
 
     def setBump(self) -> None:
+        """Khởi tạo: chỉ ô trung tâm (2,2) có nước (bump=True)."""
         for i in range(5):
             for j in range(5):
                 self.head[i][j]["bump"] = False
         self.head[2][2]["bump"] = True
 
-    def getAngle(self, pipe1)->list: 
+    def getAngle(self, pipe1)->list:
+        """Trả về danh sách các hướng (0,90,180,270) mà ống mở ra, theo type và heading.""" 
         if pipe1["type"] == 1: 
             list1 = [pipe1["heading"]]
         elif pipe1["type"] == 2:
@@ -93,6 +104,7 @@ class State:
         return ans
 
     def checkConnect(self, pipe1, pipe2, location) -> bool:
+        """Kiểm tra 2 ống có kết nối với nhau theo hướng (right/left/up/down) không."""
         list1 = self.getAngle(pipe1)
         list2 = self.getAngle(pipe2)
 
@@ -107,6 +119,7 @@ class State:
         return False
 
     def bumpWater(self, oy = 2,ox = 2):
+        """Lan truyền nước từ (oy,ox) sang các ô kề nếu ống kết nối (BFS)."""
         if self.head[oy][ox]["bump"] == False:
             return
         queue = [[oy,ox]]
@@ -132,6 +145,7 @@ class State:
                     queue.append([i-1, j])   
 
     def checkConnectToCenter(self,  oy,ox):
+        """Kiểm tra ô (oy,ox) có đường ống kết nối tới ô trung tâm (2,2) không."""
         queue = [[oy,ox]]
         visited = []
         while len(queue) != 0:
@@ -159,6 +173,7 @@ class State:
         return False
 
     def checkRecursionBump(self, oy, ox)->bool:
+        """Phát hiện vòng kín (loop) khi xoay ô (oy,ox) - A* phạt trạng thái này."""
         if ox < 4:
             if self.checkConnect(self.head[oy][ox], self.head[oy][ox + 1], "right"):
                 list1 = [  [[oy, ox + 1],[oy, ox]]      ]
@@ -227,6 +242,7 @@ class State:
         return ans
 
     def stopWaterInValve(self, oy, ox):
+        """Cắt nước khỏi các ô không còn kết nối với trung tâm sau khi xoay (oy,ox)."""
         if (oy > 4 or oy < 0) or (ox > 4 or ox < 0): return 
         queue = self.getPosiblePosition(oy,ox)        
         visited = []
@@ -259,6 +275,8 @@ class State:
         return visited
 
 class Node:
+    """Nút tìm kiếm: chứa State, ô vừa xoay (rotate), nút cha (previous), độ sâu (step)."""
+
     def __init__(self,matrix: list, rotate: list, previous) -> None:
         self.state = State(matrix)
         self.rotate = rotate
@@ -285,6 +303,7 @@ class Node:
         return self.state.head[temp[0]][temp[1]]
 
 def generate_successors(current: Node) -> list:
+    """Sinh tất cả trạng thái kế tiếp: xoay mỗi ô sang mỗi góc hợp lệ (0,90,180,270)."""
     ans = []    
     for i in range(5):
         for j in range(5):             

@@ -1,3 +1,8 @@
+"""
+Simulated Annealing (SA): Thuật toán heuristic dựa trên mô phỏng ủ kim loại.
+Mỗi bước chọn ngẫu nhiên 1 ô, xoay sang hướng khác. Chấp nhận nếu tốt hơn,
+hoặc với xác suất exp(-Δ/T) nếu tệ hơn. Không đảm bảo tìm được lời giải.
+"""
 import math
 import random
 import copy
@@ -19,6 +24,7 @@ class SimulatedAnnealingSolver(BasePipesSolver):
         self.max_iterations = max_iterations
 
     def _generate_random_neighbor(self, current_node):
+        """Sinh trạng thái kề: chọn ngẫu nhiên 1 ô, xoay sang hướng khác hợp lệ."""
     
         matrix = copy.deepcopy(current_node.state.head)
 
@@ -41,6 +47,7 @@ class SimulatedAnnealingSolver(BasePipesSolver):
         return Node(matrix, [r, c], current_node)
 
     def _quick_score(self, node):
+        """Điểm đánh giá: số ô chưa có nước (25 - countBump). Mục tiêu = 0."""
         return 25 - node.state.countBump
 
     def _run_algorithm(self) -> bool:

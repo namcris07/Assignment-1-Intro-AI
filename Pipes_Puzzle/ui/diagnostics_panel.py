@@ -1,6 +1,11 @@
+"""
+DiagnosticsPanel: Hiển thị Step, States Explored, Time, Peak Memory.
+Vẽ biểu đồ thống kê (depth_counts) cho A* và Simulated Annealing.
+"""
 import tkinter as tk
 import matplotlib.pyplot as plt
-from ui import ModernButton
+from .components import ModernButton
+
 
 class DiagnosticsPanel(tk.LabelFrame):
     def __init__(self, master, **kwargs):

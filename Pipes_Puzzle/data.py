@@ -1,24 +1,9 @@
 """
-Note:
-    In each level 5x5 Pipes:
-        set index (x, y) start with bottom-left = (0, 0)
-        increase x when through to top
-        increase y when through to right
-        each cell is a dict with two keys: type, heading.
-
-    key ["type"]:
-        value = 1 ==> Dead-end pipes
-        value = 2 ==> Straight line pipes
-        value = 3 ==> Elbow pipes
-        value = 4 ==> T-joint pipes
-
-    key ["heading"]:
-        value = 0 ==> Eastern ">" 
-        value = 90 ==> Southern "v"
-        value = 180 ==> Western "<"
-        value = 270 ==> Northern "^"
+Dữ liệu các mức Pipes Puzzle (8 level: 0-7).
+Mỗi ô là dict {type, heading}; (0,0) ở góc dưới-trái.
+type: 1=Dead-end, 2=Straight, 3=Elbow, 4=T-joint.
+heading: 0=Đông(>), 90=Nam(v), 180=Tây(<), 270=Bắc(^).
 """
-
 HEADING = [0, 90, 180, 270]
 
 TESTCASE = {

@@ -1,3 +1,7 @@
+"""
+Module solver: DFS, BFS, A*, Simulated Annealing.
+Export: State, Node, BasePipesSolver, DFSSolver, BFSSolver, AStarSolver, SimulatedAnnealingSolver.
+"""
 from .state_and_node import State, Node
 from .base_solver import BasePipesSolver
 from .dfs_solver import DFSSolver

@@ -1,6 +1,11 @@
+"""
+ControlPanel: Khung chọn thuật toán, level, nút Solve/Stop/Reset, Prev/Next.
+Tùy chọn animation step-by-step và tốc độ.
+"""
 import tkinter as tk
 from tkinter import ttk
-from ui import ModernButton
+from .components import ModernButton
+
 
 class ControlPanel(tk.Frame):
     def __init__(self, master, level_list, callbacks, **kwargs):
