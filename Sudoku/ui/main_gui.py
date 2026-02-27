@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from solver.backtracking_solver import BacktrackingSolver
+from solver.astar_csp_solver import AStarCSPSolver
 from performance.memory import PerformanceTracker
 
 COLOR_SOLVED = ("#00AA00", "#CCFFCC")
@@ -47,6 +48,7 @@ class SudokuGUI:
         self.initial_cells: set[tuple[int, int]] = set()
         self.step_by_step = tk.BooleanVar(value=True)
         self.speed_var = tk.IntVar(value=self.DEFAULT_SPEED)
+        self.algorithm_var = tk.StringVar(value="Backtracking")
         self.is_solving = False
         self.stop_solving = False
         self._setup_ui()
@@ -82,6 +84,17 @@ class SudokuGUI:
                 )
                 self.canvas.create_window(x, y, window=entry, width=self.CELL_SIZE - 8, height=self.CELL_SIZE - 8)
                 self.cells[r][c] = entry
+                
+                entry.bind('<Up>', lambda e, row=r, col=c: self._move_focus(row - 1, col))
+                entry.bind('<Down>', lambda e, row=r, col=c: self._move_focus(row + 1, col))
+                entry.bind('<Left>', lambda e, row=r, col=c: self._move_focus(row, col - 1))
+                entry.bind('<Right>', lambda e, row=r, col=c: self._move_focus(row, col + 1))
+                
+                entry.bind('<FocusIn>', lambda e, widget=entry: widget.select_range(0, tk.END))
+
+    def _move_focus(self, row: int, col: int):
+        if 0 <= row < 9 and 0 <= col < 9:
+            self.cells[row][col].focus_set()
 
     def _draw_grid_lines(self) -> None:
         for i in range(self.GRID_SIZE + 1):
@@ -92,6 +105,15 @@ class SudokuGUI:
 
     def _setup_controls(self) -> None:
         tk.Label(self.right_frame, text="Controls", font=('Arial', 12, 'bold')).pack(pady=(0, 10))
+        
+        algo_frame = tk.Frame(self.right_frame)
+        algo_frame.pack(pady=5, fill=tk.X)
+        tk.Label(algo_frame, text="Algorithm:", font=('Arial', 9, 'bold')).pack(anchor=tk.W)
+        tk.Radiobutton(algo_frame, text="Blind Search (Backtracking)", variable=self.algorithm_var, value="Backtracking").pack(anchor=tk.W)
+        tk.Radiobutton(algo_frame, text="Heuristic (A* + CSP)", variable=self.algorithm_var, value="AStar").pack(anchor=tk.W)
+        
+        self._add_separator()
+        
         ctrl_frame = tk.Frame(self.right_frame)
         ctrl_frame.pack(pady=5)
         buttons = [
@@ -144,6 +166,37 @@ class SudokuGUI:
 
     def _validate_input(self, val: str) -> bool:
         return val == "" or (val.isdigit() and 1 <= int(val) <= 9)
+
+    def _is_valid_board(self, board: list[list[int]]) -> bool:
+        for r in range(9):
+            seen = set()
+            for c in range(9):
+                val = board[r][c]
+                if val != 0:
+                    if val in seen:
+                        return False
+                    seen.add(val)
+                    
+        for c in range(9):
+            seen = set()
+            for r in range(9):
+                val = board[r][c]
+                if val != 0:
+                    if val in seen:
+                        return False
+                    seen.add(val)
+                    
+        for box_r in range(0, 9, 3):
+            for box_c in range(0, 9, 3):
+                seen = set()
+                for r in range(box_r, box_r + 3):
+                    for c in range(box_c, box_c + 3):
+                        val = board[r][c]
+                        if val != 0:
+                            if val in seen:
+                                return False
+                            seen.add(val)
+        return True
 
     def _get_board(self) -> list[list[int]]:
         return [
@@ -214,6 +267,11 @@ class SudokuGUI:
         if self.is_solving:
             return
         board = self._get_board()
+        
+        if not self._is_valid_board(board):
+            messagebox.showerror("Lỗi nhập liệu", "Bảng Sudoku không hợp lệ!\nCó số bị trùng lặp trên cùng hàng, cột hoặc khối 3x3.")
+            return
+            
         self.initial_cells = {(r, c) for r in range(9) for c in range(9) if board[r][c] != 0}
         self.is_solving = True
         self.stop_solving = False
@@ -221,13 +279,22 @@ class SudokuGUI:
         self.status_label.config(text="Solving...", fg="orange")
         self._reset_stats()
         self.root.update()
-        solver = BacktrackingSolver(board)
+        
+        # Select solver based on user choice
+        if self.algorithm_var.get() == "AStar":
+            solver_class = AStarCSPSolver
+        else:
+            solver_class = BacktrackingSolver
+            
+        solver = solver_class(board)
         perf_tracker = PerformanceTracker()
-        perf_result = perf_tracker.measure_all(BacktrackingSolver, board)
+        perf_result = perf_tracker.measure_all(solver_class, board)
+        
         if self.step_by_step.get():
             result = solver.solve(step_callback=self._step_callback)
         else:
             result = solver.solve()
+            
         self.is_solving = False
         if self.stop_solving:
             return
