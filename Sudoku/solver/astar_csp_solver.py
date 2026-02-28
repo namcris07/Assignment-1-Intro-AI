@@ -4,6 +4,7 @@ class AStarCSPSolver:
     def __init__(self, board: List[List[int]]):
         self.board = [row[:] for row in board]
         self.step_count = 0
+        self.state_count = 0
         self._callback: Optional[Callable] = None
         self._stopped = False
         self.domains: Dict[Tuple[int, int], Set[int]] = {}
@@ -67,11 +68,13 @@ class AStarCSPSolver:
         self._callback = step_callback
         self._stopped = False
         self.step_count = 0
+        self.state_count = 0
         self.domains.clear()
         self._initialize_domains()
         return self._solve_recursive()
 
     def _solve_recursive(self) -> bool:
+        self.state_count += 1
         if self._stopped:
             return False
             

@@ -131,13 +131,15 @@ class PerformanceTracker:
         self.last_peak_memory_mb = self.memory_tracker.stop()
         
         steps = getattr(solver_instance, 'step_count', 0)
+        states = getattr(solver_instance, 'state_count', 0)
         
         return {
             'success': result,
             'time_ms': self.last_time_ms,
             'memory_mb': self.last_peak_memory_mb,
             'solved_board': solver_instance.board,
-            'steps': steps
+            'steps': steps,
+            'states': states
         }
     
     def get_summary_string(self) -> str:

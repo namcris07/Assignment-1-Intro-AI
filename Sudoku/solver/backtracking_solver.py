@@ -4,6 +4,7 @@ class BacktrackingSolver:
     def __init__(self, board):
         self.board = [row[:] for row in board]
         self.step_count = 0
+        self.state_count = 0
         self._callback: Optional[Callable] = None
         self._stopped = False
 
@@ -11,9 +12,11 @@ class BacktrackingSolver:
         self._callback = step_callback
         self._stopped = False
         self.step_count = 0
+        self.state_count = 0
         return self._solve_recursive()
 
     def _solve_recursive(self) -> bool:
+        self.state_count += 1
         if self._stopped:
             return False
         find = self.find_empty()
