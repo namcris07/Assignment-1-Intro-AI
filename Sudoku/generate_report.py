@@ -17,6 +17,7 @@ def read_board_from_file(filepath):
 def main():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     easy_dir = os.path.join(base_dir, "input", "easy")
+    medium_dir = os.path.join(base_dir, "input", "medium")
     hard_dir = os.path.join(base_dir, "input", "hard")
     
     test_cases = []
@@ -27,7 +28,12 @@ def main():
             if filename.endswith(".txt"):
                 filepath = os.path.join(easy_dir, filename)
                 test_cases.append((f"Easy - {filename}", read_board_from_file(filepath)))
-                
+    # Read medium boards
+    if os.path.exists(medium_dir):
+        for filename in sorted(os.listdir(medium_dir)):
+            if filename.endswith(".txt"):
+                filepath = os.path.join(medium_dir, filename)
+                test_cases.append((f"Medium - {filename}", read_board_from_file(filepath)))
     # Read hard boards
     if os.path.exists(hard_dir):
         for filename in sorted(os.listdir(hard_dir)):
