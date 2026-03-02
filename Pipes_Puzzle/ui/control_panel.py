@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from ui import ModernButton
+from .components import ModernButton
 
 class ControlPanel(tk.Frame):
     def __init__(self, master, level_list, callbacks, **kwargs):

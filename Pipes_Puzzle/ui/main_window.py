@@ -3,7 +3,10 @@ import copy
 from solver import DFSSolver, BFSSolver, AStarSolver, SimulatedAnnealingSolver, State
 from performance.memory import PerformanceTracker
 from data import TESTCASE
-from ui import ModernButton, BoardView, DiagnosticsPanel, ControlPanel
+from .components import ModernButton
+from .board_view import BoardView
+from .diagnostics_panel import DiagnosticsPanel
+from .control_panel import ControlPanel
 
 class PipesGUI:
     def __init__(self, root: tk.Tk):
