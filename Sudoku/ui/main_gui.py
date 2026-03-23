@@ -1,6 +1,6 @@
 from __future__ import annotations
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 from solver.backtracking_solver import BacktrackingSolver
 from solver.astar_csp_solver import AStarCSPSolver
@@ -16,6 +16,24 @@ BUTTON_STYLES = {
     "danger": {"bg": "#f44336", "hover": "#d32f2f", "fg": "white", "active": "#c62828"},
 }
 
+SAMPLE_BOARDS = {
+    "Empty": [[0]*9 for _ in range(9)],
+    "Easy": [
+        [0, 2, 0, 0, 4, 0, 8, 0, 0], [0, 0, 3, 0, 0, 1, 0, 5, 0], [8, 0, 1, 7, 0, 6, 3, 4, 9],
+        [0, 0, 5, 0, 0, 9, 1, 0, 2], [2, 1, 0, 0, 0, 8, 0, 6, 4], [0, 0, 0, 0, 6, 0, 5, 0, 0],
+        [5, 6, 0, 9, 1, 3, 4, 0, 0], [0, 4, 2, 6, 0, 0, 0, 1, 0], [1, 0, 7, 0, 0, 0, 6, 0, 3]
+    ],
+    "Medium": [
+        [0, 0, 9, 5, 8, 6, 0, 0, 0], [0, 0, 0, 0, 2, 0, 0, 0, 0], [4, 0, 0, 0, 0, 0, 6, 8, 3],
+        [9, 0, 0, 6, 5, 0, 0, 3, 2], [0, 6, 0, 7, 0, 0, 0, 9, 8], [0, 3, 0, 2, 0, 0, 7, 0, 4],
+        [0, 0, 3, 0, 0, 0, 0, 0, 0], [6, 2, 0, 0, 1, 5, 0, 4, 0], [0, 0, 0, 4, 0, 0, 0, 5, 0]
+    ],
+    "Hard": [
+        [0, 0, 7, 0, 0, 0, 0, 0, 3], [1, 5, 9, 0, 0, 0, 0, 0, 0], [0, 0, 8, 0, 0, 0, 2, 0, 7],
+        [0, 0, 0, 2, 0, 0, 0, 4, 6], [0, 4, 0, 0, 0, 7, 0, 0, 0], [5, 0, 0, 8, 0, 0, 0, 0, 0],
+        [0, 8, 0, 0, 5, 0, 9, 0, 0], [0, 0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 9, 1, 0, 7, 0]
+    ]
+}
 
 class ModernButton(tk.Button):
     def __init__(self, master, text: str, command, style: str = "primary", **kwargs):
@@ -89,8 +107,8 @@ class SudokuGUI:
                 entry.bind('<Down>', lambda e, row=r, col=c: self._move_focus(row + 1, col))
                 entry.bind('<Left>', lambda e, row=r, col=c: self._move_focus(row, col - 1))
                 entry.bind('<Right>', lambda e, row=r, col=c: self._move_focus(row, col + 1))
-                
                 entry.bind('<FocusIn>', lambda e, widget=entry: widget.select_range(0, tk.END))
+                entry.bind('<KeyRelease>', lambda e: self._check_realtime_validity())
 
     def _move_focus(self, row: int, col: int):
         if 0 <= row < 9 and 0 <= col < 9:
@@ -111,6 +129,20 @@ class SudokuGUI:
         tk.Label(algo_frame, text="Algorithm:", font=('Arial', 9, 'bold')).pack(anchor=tk.W)
         tk.Radiobutton(algo_frame, text="Blind Search (Backtracking)", variable=self.algorithm_var, value="Backtracking").pack(anchor=tk.W)
         tk.Radiobutton(algo_frame, text="Heuristic (A* + CSP)", variable=self.algorithm_var, value="AStar").pack(anchor=tk.W)
+        
+        self._add_separator()
+        
+        sample_frame = tk.Frame(self.right_frame)
+        sample_frame.pack(pady=5, fill=tk.X)
+        tk.Label(sample_frame, text="Bảng mẫu:", font=('Arial', 9, 'bold')).pack(anchor=tk.W)
+        self.sample_var = tk.StringVar()
+        self.sample_dropdown = ttk.Combobox(
+            sample_frame, textvariable=self.sample_var, 
+            values=list(SAMPLE_BOARDS.keys()), state="readonly"
+        )
+        self.sample_dropdown.pack(fill=tk.X, pady=2)
+        self.sample_dropdown.bind("<<ComboboxSelected>>", self._load_sample)
+        self.sample_dropdown.set("Trống")
         
         self._add_separator()
         
@@ -167,6 +199,36 @@ class SudokuGUI:
     def _validate_input(self, val: str) -> bool:
         return val == "" or (val.isdigit() and 1 <= int(val) <= 9)
 
+    def _check_realtime_validity(self, event=None) -> None:
+        board = self._get_board()
+        invalid_cells = set()
+
+        for r in range(9):
+            for c in range(9):
+                val = board[r][c]
+                if val != 0:
+                    for i in range(9):
+                        if i != c and board[r][i] == val:
+                            invalid_cells.add((r, c))
+                            invalid_cells.add((r, i))
+                    for i in range(9):
+                        if i != r and board[i][c] == val:
+                            invalid_cells.add((r, c))
+                            invalid_cells.add((i, c))
+                    box_r, box_c = (r // 3) * 3, (c // 3) * 3
+                    for i in range(box_r, box_r + 3):
+                        for j in range(box_c, box_c + 3):
+                            if (i, j) != (r, c) and board[i][j] == val:
+                                invalid_cells.add((r, c))
+                                invalid_cells.add((i, j))
+
+        for r in range(9):
+            for c in range(9):
+                if (r, c) in invalid_cells:
+                    self.cells[r][c].config(fg='white', bg='red')
+                else:
+                    self.cells[r][c].config(fg='black', bg='white')
+
     def _is_valid_board(self, board: list[list[int]]) -> bool:
         for r in range(9):
             seen = set()
@@ -215,6 +277,13 @@ class SudokuGUI:
                     cell.insert(0, str(board[r][c]))
                     self.initial_cells.add((r, c))
 
+    def _load_sample(self, event=None) -> None:
+        board_name = self.sample_var.get()
+        board = SAMPLE_BOARDS.get(board_name)
+        if board:
+            self._set_board(board)
+            self._check_realtime_validity()
+
     def _update_cell(self, row: int, col: int, value: int, is_remove: bool = False) -> None:
         cell = self.cells[row][col]
         cell.delete(0, tk.END)
@@ -257,10 +326,7 @@ class SudokuGUI:
             time_text = f"Time: {time_ms:.2f} ms ({time_ms/1000:.2f}s)"
             time_color = "#FF9800"
         self.time_label.config(text=time_text, fg=time_color)
-        if memory_mb < 0.01:
-            memory_text = f"Memory: {memory_mb * 1024:.2f} KB"
-        else:
-            memory_text = f"Memory: {memory_mb:.4f} MB"
+        memory_text = f"Memory: {memory_mb * 1024:.2f} KB"
         self.memory_label.config(text=memory_text, fg="#9C27B0")
 
     def _solve(self) -> None:
@@ -280,7 +346,6 @@ class SudokuGUI:
         self._reset_stats()
         self.root.update()
         
-        # Select solver based on user choice
         if self.algorithm_var.get() == "AStar":
             solver_class = AStarCSPSolver
         else:
@@ -318,6 +383,7 @@ class SudokuGUI:
         self.initial_cells.clear()
         self.status_label.config(text="Ready", fg="blue")
         self.step_label.config(text="Steps: 0")
+        self.sample_dropdown.set("Trống")
         self._reset_stats()
         for r in range(9):
             for c in range(9):
