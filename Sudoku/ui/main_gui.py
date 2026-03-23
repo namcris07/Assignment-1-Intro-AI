@@ -371,7 +371,7 @@ class SudokuGUI:
                         self.cells[r][c].config(fg=COLOR_SOLVED[0], bg=COLOR_SOLVED[1])
             self.step_label.config(text=f"Steps: {getattr(solver, 'step_count', 0)}")
             self.status_label.config(text="Solved", fg="green")
-            self._display_stats(perf_result['steps'], perf_result['time_ms'], perf_result['memory_mb'])
+            self._display_stats(perf_result['states'], perf_result['time_ms'], perf_result['memory_mb'])
         else:
             self.status_label.config(text="No solution found", fg="red")
             self._reset_stats()
