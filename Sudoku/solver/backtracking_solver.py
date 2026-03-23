@@ -50,15 +50,14 @@ class BacktrackingSolver:
 
     def is_valid(self, num, pos):
         row, col = pos
-        for j in range(9):
-            if self.board[row][j] == num and col != j:
-                return False
+        if num in self.board[row]:
+            return False
         for i in range(9):
-            if self.board[i][col] == num and row != i:
+            if self.board[i][col] == num:
                 return False
         box_row, box_col = (row // 3) * 3, (col // 3) * 3
         for i in range(box_row, box_row + 3):
             for j in range(box_col, box_col + 3):
-                if self.board[i][j] == num and (i, j) != pos:
+                if self.board[i][j] == num:
                     return False
         return True
